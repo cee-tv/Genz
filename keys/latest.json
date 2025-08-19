@@ -1,0 +1,19 @@
+{
+  "generated_at_pht": "2025-08-19T15:34:02.292215+08:00",
+  "generated_at_utc": "2025-08-19T07:34:02.292215+00:00",
+  "unit": "days",
+  "amount": 7,
+  "count": 5,
+  "tag": "",
+  "expires_at_pht": "2025-08-26T15:34:02.292215+08:00",
+  "expires_at_utc": "2025-08-26T07:34:02.292215+00:00",
+  "expires_at_unix": 1756193642,
+  "timezone": "Asia/Manila (GMT+8)",
+  "keys": [
+    "KEY-Y_3mxig1MrYZ8Yq7sRQG5w",
+    "KEY-Rdj7WOVN8fZ6g28_oAXtkg",
+    "KEY-2XG-M2zDK0em1TbMR_OVCw",
+    "KEY-IMjSmROPlQmLZndFbAtzRQ",
+    "KEY-xByhOdp_kLkboKjHzG81wA"
+  ]
+}
