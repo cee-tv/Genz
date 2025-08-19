@@ -1,99 +1,61 @@
-name: Generate Keys
+name: Generate Authentication Keys
 
 on:
   workflow_dispatch:
     inputs:
+      duration:
+        description: 'Duration amount'
+        required: true
+        default: '1'
       unit:
-        description: "Validity unit (days|weeks|months|years)"
+        description: 'Duration unit'
         required: true
-        default: "days"
-      amount:
-        description: "How many units"
-        required: true
-        default: "7"
-      count:
-        description: "How many keys to generate"
-        required: true
-        default: "5"
-      tag:
-        description: "Optional tag/label to group this run"
+        default: 'years'
+        type: choice
+        options:
+          - days
+          - weeks
+          - months
+          - years
+      key_count:
+        description: 'Number of keys to generate'
         required: false
-        default: ""
-  repository_dispatch:
-    types: [request_key]
-
-permissions:
-  contents: write    # to commit keys JSON/CSV back to the repo
-  actions: read
+        default: '1'
 
 jobs:
-  generate:
+  generate-keys:
     runs-on: ubuntu-latest
+    
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+        
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        
+    - name: Generate keys
+      run: |
+        for i in $(seq 1 ${{ github.event.inputs.key_count }}); do
+          python generatekey.py --duration ${{ github.event.inputs.duration }} --unit ${{ github.event.inputs.unit }}
+        done
+        
+    - name: Upload generated keys
+      uses: actions/upload-artifact@v3
+      with:
+        name: generated-keys
+        path: keys.json
+        
+    - name: Commit keys to repository
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add keys.json
+        git diff --staged --quiet || git commit -m "Add generated authentication keys"
+        git push
 
-      - name: Choose inputs (supports workflow_dispatch or repository_dispatch)
-        id: pick
-        run: |
-          # For workflow_dispatch
-          UNIT="${{ github.event.inputs.unit }}"
-          AMOUNT="${{ github.event.inputs.amount }}"
-          COUNT="${{ github.event.inputs.count }}"
-          TAG="${{ github.event.inputs.tag }}"
-
-          # For repository_dispatch (payload under client_payload)
-          if [ -z "$UNIT" ]; then UNIT="${{ github.event.client_payload.unit }}"; fi
-          if [ -z "$AMOUNT" ]; then AMOUNT="${{ github.event.client_payload.amount }}"; fi
-          if [ -z "$COUNT" ]; then COUNT="${{ github.event.client_payload.count }}"; fi
-          if [ -z "$TAG" ]; then TAG="${{ github.event.client_payload.tag }}"; fi
-
-          # Defaults if still empty:
-          if [ -z "$UNIT" ]; then UNIT="days"; fi
-          if [ -z "$AMOUNT" ]; then AMOUNT="7"; fi
-          if [ -z "$COUNT" ]; then COUNT="5"; fi
-
-          echo "UNIT=$UNIT"   >> "$GITHUB_ENV"
-          echo "AMOUNT=$AMOUNT" >> "$GITHUB_ENV"
-          echo "COUNT=$COUNT" >> "$GITHUB_ENV"
-          echo "TAG=$TAG" >> "$GITHUB_ENV"
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-
-      - name: Install deps
-        run: |
-          python -m pip install --upgrade pip
-          pip install python-dateutil
-
-      - name: Generate keys
-        run: |
-          python generatekey.py \
-            --unit "${UNIT}" \
-            --amount "${AMOUNT}" \
-            --count "${COUNT}" \
-            --tag "${TAG}" \
-            --output-dir "keys"
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: generated-keys
-          path: |
-            keys/run_*/keys.json
-            keys/run_*/keys.csv
-
-      - name: Commit keys/latest.json
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          # Commit only if there are changes
-          if [ -n "$(git status --porcelain)" ]; then
-            git add keys/latest.json keys/index.json || true
-            git commit -m "Update keys (unit=${UNIT}, amount=${AMOUNT}, count=${COUNT})"
-            git push
-          else
-            echo "No changes to commit."
-          fi
