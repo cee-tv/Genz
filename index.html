@@ -1,112 +1,314 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <title>Generate Keys (PHT)</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link href="styles.css" rel="stylesheet" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Key Generator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            max-width: 500px;
+            width: 100%;
+        }
+
+        h1 {
+            color: white;
+            margin-bottom: 30px;
+            text-align: center;
+            font-size: 2.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            color: white;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .input-container {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        input[type="number"] {
+            flex: 2;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        input[type="number"]:focus {
+            outline: none;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        input[type="number"]::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        select {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        select:focus {
+            outline: none;
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        select option {
+            background: #667eea;
+            color: white;
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .result {
+            margin-top: 30px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            color: white;
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .key-display {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            word-break: break-all;
+            margin: 10px 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .key-display:hover {
+            background: rgba(0, 0, 0, 0.4);
+        }
+
+        .copy-notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #4CAF50;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            display: none;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .error {
+            background: rgba(255, 100, 100, 0.3);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            display: none;
+        }
+    </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Generate Keys (Philippine Standard Time)</h1>
+    <div class="container">
+        <h1>Key Generator</h1>
+        <form id="keyForm">
+            <div class="form-group">
+                <label for="duration">Valid for</label>
+                <div class="input-container">
+                    <input type="number" id="duration" min="1" placeholder="1" value="1" required>
+                    <select id="unit">
+                        <option value="days">Days</option>
+                        <option value="weeks">Weeks</option>
+                        <option value="months">Months</option>
+                        <option value="years">Years</option>
+                    </select>
+                </div>
+            </div>
+            <button type="submit">Generate Key</button>
+        </form>
 
-    <section class="card">
-      <h2>Request new keys (runs workflow)</h2>
-      <div class="grid">
-        <label>
-          Unit
-          <select id="unit">
-            <option>days</option>
-            <option>weeks</option>
-            <option>months</option>
-            <option>years</option>
-          </select>
-        </label>
-        <label>
-          Amount
-          <input id="amount" type="number" min="1" value="7" />
-        </label>
-        <label>
-          Count (# keys)
-          <input id="count" type="number" min="1" value="5" />
-        </label>
-        <label>
-          Optional tag
-          <input id="tag" type="text" placeholder="e.g. promo-august" />
-        </label>
-      </div>
-
-      <details class="advanced">
-        <summary>Advanced (GitHub repo + token)</summary>
-        <div class="grid">
-          <label>
-            GitHub Owner
-            <input id="owner" type="text" placeholder="your-username-or-org" />
-          </label>
-          <label>
-            Repo
-            <input id="repo" type="text" placeholder="your-repo" />
-          </label>
-          <label>
-            Branch/Ref
-            <input id="ref" type="text" value="main" />
-          </label>
-          <label>
-            Workflow File
-            <input id="workflow" type="text" value="generate-keys.yml" />
-          </label>
-          <label>
-            PAT (repo + workflow scope)
-            <input id="token" type="password" placeholder="GitHub Personal Access Token" />
-          </label>
+        <div class="error" id="error">
+            Please enter a valid duration
         </div>
-        <p class="note">
-          Your token is used client-side to call GitHub’s API
-          (<code>workflow_dispatch</code>). It is <strong>not</strong> stored.
-          For public repos, you can omit the token for “View keys” but you
-          <em>do</em> need a token to trigger a run.
-        </p>
-      </details>
 
-      <div class="actions">
-        <button id="runBtn">Request Keys (trigger workflow)</button>
-        <span id="runStatus" class="status"></span>
-      </div>
-    </section>
+        <div class="result" id="result">
+            <h3>Generated Key:</h3>
+            <div class="key-display" id="keyDisplay"></div>
+            <p>Expires: <span id="expires"></span></p>
+        </div>
+    </div>
 
-    <section class="card">
-      <h2>Latest generated keys</h2>
-      <div class="grid">
-        <label>
-          Raw JSON URL (latest)
-          <input id="jsonUrl" type="text" placeholder="https://raw.githubusercontent.com/OWNER/REPO/BRANCH/keys/latest.json" />
-        </label>
-      </div>
-      <div class="actions">
-        <button id="fetchBtn">Fetch Latest</button>
-        <span id="fetchStatus" class="status"></span>
-      </div>
+    <div class="copy-notification" id="copyNotification">
+        Key copied to clipboard!
+    </div>
 
-      <pre id="output" class="output"></pre>
-      <table id="table" class="table hidden">
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Key</th>
-            <th>Expires (PHT)</th>
-            <th>Expires (Unix)</th>
-            <th>Tag</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </section>
+    <script>
+        const form = document.getElementById('keyForm');
+        const result = document.getElementById('result');
+        const keyDisplay = document.getElementById('keyDisplay');
+        const expires = document.getElementById('expires');
+        const error = document.getElementById('error');
+        const copyNotification = document.getElementById('copyNotification');
 
-    <footer>
-      <small>All expirations computed on the server in Asia/Manila (GMT+8).</small>
-    </footer>
-  </div>
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const duration = parseInt(document.getElementById('duration').value);
+            const unit = document.getElementById('unit').value;
 
-  <script src="script.js"></script>
+            if (!duration || duration < 1) {
+                error.style.display = 'block';
+                result.style.display = 'none';
+                return;
+            }
+
+            error.style.display = 'none';
+
+            // Calculate days based on unit
+            let days = 0;
+            switch(unit) {
+                case 'days':
+                    days = duration;
+                    break;
+                case 'weeks':
+                    days = duration * 7;
+                    break;
+                case 'months':
+                    days = duration * 30;
+                    break;
+                case 'years':
+                    days = duration * 365;
+                    break;
+            }
+
+            // Generate key
+            const key = generateSecureKey();
+            const expiration = calculateExpiration(days);
+
+            keyDisplay.textContent = key;
+            expires.textContent = expiration.toLocaleString();
+            result.style.display = 'block';
+
+            // Store in localStorage for demo purposes
+            const keyData = {
+                key: key,
+                expires: expiration.toISOString(),
+                created: new Date().toISOString(),
+                duration: duration,
+                unit: unit
+            };
+            
+            let keys = JSON.parse(localStorage.getItem('generated_keys') || '[]');
+            keys.push(keyData);
+            localStorage.setItem('generated_keys', JSON.stringify(keys));
+        });
+
+        keyDisplay.addEventListener('click', () => {
+            navigator.clipboard.writeText(keyDisplay.textContent).then(() => {
+                copyNotification.style.display = 'block';
+                setTimeout(() => {
+                    copyNotification.style.display = 'none';
+                }, 2000);
+            });
+        });
+
+        function generateSecureKey() {
+            const array = new Uint8Array(32);
+            crypto.getRandomValues(array);
+            return btoa(String.fromCharCode.apply(null, array))
+                .replace(/\+/g, '-')
+                .replace(/\//g, '_')
+                .replace(/=/g, '');
+        }
+
+        function calculateExpiration(days) {
+            const date = new Date();
+            date.setDate(date.getDate() + days);
+            return date;
+        }
+    </script>
 </body>
 </html>
