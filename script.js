@@ -9,7 +9,7 @@ function setStatus(el, msg, ok = true) {
 
 async function triggerWorkflow({owner, repo, ref, workflow, token, inputs}) {
   // POST https://api.github.com/repos/{owner}/{repo}/actions/workflows/{workflow_id}/dispatches
-  const url = `https://api.github.com/repos/${owner}/${repo}/actions/workflows/${workflow}/dispatches`;
+  const url = `https://api.github.com/repos/cee-tv/Genz/actions/workflows/${workflow}/dispatches`;
   const res = await fetch(url, {
     method: "POST",
     headers: {
